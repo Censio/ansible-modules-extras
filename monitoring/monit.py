@@ -71,7 +71,7 @@ def main():
 
     MONIT = module.get_bin_path('monit', True)
 
-    def status():
+    def get_status():
         """Return the status of the process in monit, or the empty string if not present."""
         rc, out, err = module.run_command('%s summary' % MONIT, check_rc=True)
         for line in out.split('\n'):
@@ -87,14 +87,14 @@ def main():
     def run_command(command):
         """Runs a monit command, and returns the new status."""
         module.run_command('%s %s %s' % (MONIT, command, name), check_rc=True)
-        return status()
+        return get_status()
 
     def wait_for_monit_to_stop_pending():
         """Fails this run if there is no status or it's pending/initalizing for timeout"""
         timeout_time = time.time() + timeout
         sleep_time = 5
 
-        running_status = status()
+        running_status = get_status()
         while running_status == '' or 'pending' in running_status or 'initializing' in running_status:
             if time.time() >= timeout_time:
                 module.fail_json(
@@ -105,7 +105,7 @@ def main():
                 )
 
             time.sleep(sleep_time)
-            running_status = status()
+            running_status = get_status()
 
     if state == 'reloaded':
         if module.check_mode:
@@ -116,7 +116,7 @@ def main():
         wait_for_monit_to_stop_pending()
         module.exit_json(changed=True, name=name, state=state)
 
-    present = status() != ''
+    present = get_status() != ''
 
     if not present and not state == 'present':
         module.fail_json(msg='%s process not presently configured with monit' % name, name=name, state=state)
@@ -132,7 +132,7 @@ def main():
         module.exit_json(changed=False, name=name, state=state)
 
     wait_for_monit_to_stop_pending()
-    running = 'running' in status()
+    running = 'running' in get_status()
 
     if running and state in ['started', 'monitored']:
         module.exit_json(changed=False, name=name, state=state)
