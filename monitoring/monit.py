@@ -73,7 +73,11 @@ def main():
 
     def get_status():
         """Return the status of the process in monit, or the empty string if not present."""
-        rc, out, err = module.run_command('%s summary' % MONIT, check_rc=True)
+        rc, out, err = module.run_command('%s summary' % MONIT)
+        if err:  # There is a race condition with newer versions of monit that causes a conn refused. Lets allow 1 retry
+            time.sleep(1) # one second should be enough time for monit to startup
+            rc, out, err = module.run_command('%s summary' % MONIT, check_rc=True)
+
         for line in out.split('\n'):
             # Sample output lines:
             # Process 'name'    Running
