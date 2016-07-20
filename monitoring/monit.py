@@ -73,7 +73,7 @@ def main():
 
     def status():
         """Return the status of the process in monit, or the empty string if not present."""
-        rc, out, err = module.run_command('%s summary' % MONIT, check_rc=True)
+        rc, out, err = module.run_command('%s summary' % MONIT)
         for line in out.split('\n'):
             # Sample output lines:
             # Process 'name'    Running
