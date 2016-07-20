@@ -92,7 +92,7 @@ def main():
     def wait_for_monit_to_stop_pending():
         """Fails this run if there is no status or it's pending/initalizing for timeout"""
         timeout_time = time.time() + timeout
-        sleep_time = 5
+        sleep_time = 1  # setting this lower will make the module more responsive 1 second hardly feels aggressive
 
         running_status = get_status()
         while running_status == '' or 'pending' in running_status or 'initializing' in running_status:
